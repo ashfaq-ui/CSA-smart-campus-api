@@ -31,4 +31,10 @@ public class Room {
 
     public List<String> getSensorIds() { return sensorIds; }
     public void setSensorIds(List<String> sensorIds) { this.sensorIds = sensorIds; }
+
+    @Override
+    public String toString() {
+        return "Room{id='" + id + "', name='" + name
+                + "', capacity=" + capacity + "}";
+    }
 }
