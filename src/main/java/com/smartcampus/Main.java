@@ -15,7 +15,8 @@ public class Main {
                 .packages(
                         "com.smartcampus.resource",
                         "com.smartcampus.config",
-                        "com.smartcampus.exception"
+                        "com.smartcampus.exception",
+                        "com.smartcampus.filter"
                 )
                 .register(JacksonFeature.class);
 
