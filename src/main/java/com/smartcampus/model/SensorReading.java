@@ -25,4 +25,10 @@ public class SensorReading {
 
     public double getValue() { return value; }
     public void setValue(double value) { this.value = value; }
+
+    @Override
+    public String toString() {
+        return "SensorReading{id='" + id + "', value="
+                + value + ", timestamp=" + timestamp + "}";
+    }
 }
