@@ -4,12 +4,10 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.smartcampus</groupId>
   <artifactId>smart-campus-api</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-
   <name>Smart Campus API</name>
 
   <properties>
@@ -20,47 +18,52 @@
 
   <dependencies>
 
-    <!-- Jersey JAX-RS implementation -->
     <dependency>
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-grizzly2-http</artifactId>
-      <version>2.41</version>
+      <version>2.35</version>
     </dependency>
 
-    <!-- Jersey core server -->
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>2.41</version>
+      <version>2.35</version>
     </dependency>
 
-    <!-- JSON support via Jackson -->
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-json-jackson</artifactId>
-      <version>2.41</version>
+      <version>2.35</version>
     </dependency>
 
-    <!-- Dependency injection for Jersey -->
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
       <artifactId>jersey-hk2</artifactId>
-      <version>2.41</version>
+      <version>2.35</version>
     </dependency>
 
-    <!-- JUnit for tests -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
-      <scope>test</scope>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.13.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>2.13.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.13.4</version>
     </dependency>
 
   </dependencies>
 
   <build>
     <plugins>
-      <!-- Package as executable fat JAR -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
