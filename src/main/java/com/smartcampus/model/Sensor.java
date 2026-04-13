@@ -1,5 +1,8 @@
 package com.smartcampus.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Sensor {
 
     private String id;
