@@ -1,6 +1,7 @@
 package com.smartcampus.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartcampus.exception.LinkedResourceNotFoundException;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.Room;
 import com.smartcampus.store.DataStore;
@@ -69,13 +70,9 @@ public class SensorResource {
                         .entity("{\"error\":\"Room ID is required\"}")
                         .build();
             }
-
             Room room = store.getRooms().get(sensor.getRoomId());
             if (room == null) {
-                return Response.status(422)
-                        .entity("{\"error\":\"Room not found with ID: "
-                                + sensor.getRoomId() + "\"}")
-                        .build();
+                throw new LinkedResourceNotFoundException("Room", sensor.getRoomId());
             }
 
             // Set default status if not provided
