@@ -1,3 +1,7 @@
+/**
+ * Resource class for managing Rooms.
+ * Handles GET, POST, PUT, DELETE for /api/v1/rooms
+ */
 package com.smartcampus.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
