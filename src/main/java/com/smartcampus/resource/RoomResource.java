@@ -5,11 +5,13 @@ import com.smartcampus.exception.RoomNotEmptyException;
 import com.smartcampus.model.Room;
 import com.smartcampus.store.DataStore;
 
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Path("/api/v1/rooms")
 @Produces(MediaType.APPLICATION_JSON)
@@ -86,5 +88,38 @@ public class RoomResource {
         }
         store.getRooms().remove(roomId);
         return Response.noContent().build();
+    }
+
+    // PUT /api/v1/rooms/{roomId} - update a room
+    @PUT
+    @Path("/{roomId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateRoom(
+            @PathParam("roomId") String roomId, String body) {
+        try {
+            Room existing = store.getRooms().get(roomId);
+            if (existing == null) {
+                return Response.status(404)
+                        .entity("{\"error\":\"Room not found: " + roomId + "\"}")
+                        .build();
+            }
+
+            Room updated = mapper.readValue(body, Room.class);
+
+            if (updated.getName() != null) {
+                existing.setName(updated.getName());
+            }
+            if (updated.getCapacity() != 0) {
+                existing.setCapacity(updated.getCapacity());
+            }
+
+            return Response.ok(mapper.writeValueAsString(existing)).build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(500)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 }
