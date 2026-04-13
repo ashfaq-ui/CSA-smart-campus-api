@@ -38,4 +38,10 @@ public class DataStore {
     public List<SensorReading> getReadingsForSensor(String sensorId) {
         return readings.computeIfAbsent(sensorId, k -> new ArrayList<>());
     }
+
+    public void clearAll() {
+        rooms.clear();
+        sensors.clear();
+        readings.clear();
+    }
 }
