@@ -1,3 +1,9 @@
+/**
+ * Global exception mapper that catches all unhandled exceptions
+ * and returns a clean 500 JSON response.
+ */
+
+
 package com.smartcampus.exception;
 
 import javax.ws.rs.core.Response;
