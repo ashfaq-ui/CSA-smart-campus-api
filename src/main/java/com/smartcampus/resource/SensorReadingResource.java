@@ -52,38 +52,33 @@ public class SensorReadingResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addReading(String body) {
+
+        // Check sensor exists
+        Sensor sensor = store.getSensors().get(sensorId);
+        if (sensor == null) {
+            return Response.status(404)
+                    .entity("{\"error\":\"Sensor not found: " + sensorId + "\"}")
+                    .build();
+        }
+
+        // Check sensor status BEFORE try-catch so exception reaches the mapper
+        if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus()) ||
+                "OFFLINE".equalsIgnoreCase(sensor.getStatus())) {
+            throw new SensorUnavailableException(sensorId, sensor.getStatus());
+        }
+
         try {
-            // Check sensor exists
-            Sensor sensor = store.getSensors().get(sensorId);
-            if (sensor == null) {
-                return Response.status(404)
-                        .entity("{\"error\":\"Sensor not found: " + sensorId + "\"}")
-                        .build();
-            }
+            SensorReading reading = mapper.readValue(body, SensorReading.class);
 
-            // Check sensor is not in MAINTENANCE or OFFLINE
-            if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus()) ||
-                    "OFFLINE".equalsIgnoreCase(sensor.getStatus())) {
-                throw new SensorUnavailableException(sensorId, sensor.getStatus());
-            }
-
-            SensorReading reading = mapper.readValue(body,
-                    SensorReading.class);
-
-            // Auto generate ID if not provided
             if (reading.getId() == null || reading.getId().isEmpty()) {
                 reading.setId(UUID.randomUUID().toString());
             }
 
-            // Auto set timestamp if not provided
             if (reading.getTimestamp() == 0) {
                 reading.setTimestamp(System.currentTimeMillis());
             }
 
-            // Save reading
             store.getReadingsForSensor(sensorId).add(reading);
-
-            // Update currentValue on parent sensor
             sensor.setCurrentValue(reading.getValue());
 
             return Response.status(201)
