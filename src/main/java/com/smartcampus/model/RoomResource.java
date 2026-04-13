@@ -1,6 +1,7 @@
 package com.smartcampus.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartcampus.exception.RoomNotEmptyException;
 import com.smartcampus.model.Room;
 import com.smartcampus.store.DataStore;
 
@@ -81,9 +82,7 @@ public class RoomResource {
                     .build();
         }
         if (!room.getSensorIds().isEmpty()) {
-            return Response.status(409)
-                    .entity("{\"error\":\"Cannot delete room. Remove all sensors first.\"}")
-                    .build();
+            throw new RoomNotEmptyException(roomId);
         }
         store.getRooms().remove(roomId);
         return Response.noContent().build();
