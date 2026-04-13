@@ -144,4 +144,40 @@ public class SensorResource {
             @PathParam("sensorId") String sensorId) {
         return new SensorReadingResource(sensorId);
     }
+
+    // PUT /api/v1/sensors/{sensorId} - update sensor status
+    @PUT
+    @Path("/{sensorId}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateSensor(
+            @PathParam("sensorId") String sensorId, String body) {
+        try {
+            Sensor existing = store.getSensors().get(sensorId);
+            if (existing == null) {
+                return Response.status(404)
+                        .entity("{\"error\":\"Sensor not found: " + sensorId + "\"}")
+                        .build();
+            }
+
+            Sensor updated = mapper.readValue(body, Sensor.class);
+
+            if (updated.getStatus() != null) {
+                existing.setStatus(updated.getStatus());
+            }
+            if (updated.getType() != null) {
+                existing.setType(updated.getType());
+            }
+            if (updated.getCurrentValue() != 0) {
+                existing.setCurrentValue(updated.getCurrentValue());
+            }
+
+            return Response.ok(mapper.writeValueAsString(existing)).build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(500)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
 }
