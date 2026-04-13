@@ -140,4 +140,11 @@ public class SensorResource {
         store.getSensors().remove(sensorId);
         return Response.noContent().build();
     }
+
+    // Sub-resource locator for /api/v1/sensors/{sensorId}/readings
+    @Path("/{sensorId}/readings")
+    public SensorReadingResource getReadingResource(
+            @PathParam("sensorId") String sensorId) {
+        return new SensorReadingResource(sensorId);
+    }
 }
