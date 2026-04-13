@@ -1,3 +1,8 @@
+/**
+ * Resource class for managing Sensors.
+ * Handles GET, POST, PUT, DELETE for /api/v1/sensors
+ * Supports filtering by type via ?type= query parameter
+ */
 package com.smartcampus.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
