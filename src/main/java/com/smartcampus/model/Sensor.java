@@ -36,4 +36,10 @@ public class Sensor {
 
     public String getRoomId() { return roomId; }
     public void setRoomId(String roomId) { this.roomId = roomId; }
+
+    @Override
+    public String toString() {
+        return "Sensor{id='" + id + "', type='" + type
+                + "', status='" + status + "'}";
+    }
 }
