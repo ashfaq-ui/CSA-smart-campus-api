@@ -1,6 +1,7 @@
 package com.smartcampus.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartcampus.exception.SensorUnavailableException;
 import com.smartcampus.model.Sensor;
 import com.smartcampus.model.SensorReading;
 import com.smartcampus.store.DataStore;
@@ -60,20 +61,10 @@ public class SensorReadingResource {
                         .build();
             }
 
-            // Check sensor is not in MAINTENANCE
-            if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus())) {
-                return Response.status(403)
-                        .entity("{\"error\":\"Sensor is under maintenance" +
-                                " and cannot accept readings\"}")
-                        .build();
-            }
-
-            // Check sensor is not OFFLINE
-            if ("OFFLINE".equalsIgnoreCase(sensor.getStatus())) {
-                return Response.status(403)
-                        .entity("{\"error\":\"Sensor is offline" +
-                                " and cannot accept readings\"}")
-                        .build();
+            // Check sensor is not in MAINTENANCE or OFFLINE
+            if ("MAINTENANCE".equalsIgnoreCase(sensor.getStatus()) ||
+                    "OFFLINE".equalsIgnoreCase(sensor.getStatus())) {
+                throw new SensorUnavailableException(sensorId, sensor.getStatus());
             }
 
             SensorReading reading = mapper.readValue(body,
