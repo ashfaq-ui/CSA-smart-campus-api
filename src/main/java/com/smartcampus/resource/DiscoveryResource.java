@@ -26,6 +26,10 @@ public class DiscoveryResource {
         links.put("sensors", "/api/v1/sensors");
         response.put("resources", links);
 
+
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("documentation", "See README.md for full API docs");
+
         return Response.ok(response).build();
     }
 }
