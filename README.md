@@ -256,3 +256,17 @@ to be updated. It also keeps resource methods clean and focused on
 business logic only. Filters are applied consistently to all endpoints
 without any risk of forgetting to add logging to a new method. This
 is the same principle behind Aspect-Oriented Programming.
+
+## Error Codes Summary
+
+| Code | Meaning | Scenario |
+|------|---------|----------|
+| 200 | OK | Successful GET |
+| 201 | Created | Successful POST |
+| 204 | No Content | Successful DELETE |
+| 400 | Bad Request | Missing required fields |
+| 403 | Forbidden | Sensor in MAINTENANCE or OFFLINE |
+| 404 | Not Found | Resource does not exist |
+| 409 | Conflict | Delete room with sensors |
+| 422 | Unprocessable Entity | Invalid roomId reference |
+| 500 | Internal Server Error | Unexpected server error |
