@@ -1,3 +1,7 @@
+/**
+ * Singleton DataStore for in-memory storage.
+ * Uses ConcurrentHashMap for thread-safe access.
+ */
 package com.smartcampus.store;
 
 import com.smartcampus.model.Room;
