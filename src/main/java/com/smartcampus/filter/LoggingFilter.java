@@ -1,3 +1,9 @@
+/**
+ * JAX-RS filter for logging all incoming requests
+ * and outgoing responses.
+ */
+
+
 package com.smartcampus.filter;
 
 import javax.ws.rs.container.ContainerRequestContext;
