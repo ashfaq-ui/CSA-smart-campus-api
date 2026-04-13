@@ -92,4 +92,36 @@ public class SensorReadingResource {
                     .build();
         }
     }
+    // GET /api/v1/sensors/{sensorId}/readings/{readingId}
+    @GET
+    @Path("/{readingId}")
+    public Response getReadingById(
+            @PathParam("readingId") String readingId) {
+        try {
+            Sensor sensor = store.getSensors().get(sensorId);
+            if (sensor == null) {
+                return Response.status(404)
+                        .entity("{\"error\":\"Sensor not found: " + sensorId + "\"}")
+                        .build();
+            }
+
+            List<SensorReading> readings =
+                    store.getReadingsForSensor(sensorId);
+            for (SensorReading r : readings) {
+                if (r.getId().equals(readingId)) {
+                    return Response.ok(
+                            mapper.writeValueAsString(r)).build();
+                }
+            }
+
+            return Response.status(404)
+                    .entity("{\"error\":\"Reading not found: " + readingId + "\"}")
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(500)
+                    .entity("{\"error\":\"" + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
 }
