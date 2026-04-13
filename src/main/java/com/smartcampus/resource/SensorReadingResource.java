@@ -1,3 +1,7 @@
+/**
+ * Sub-resource class for managing SensorReadings.
+ * Handles GET and POST for /api/v1/sensors/{sensorId}/readings
+ */
 package com.smartcampus.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
