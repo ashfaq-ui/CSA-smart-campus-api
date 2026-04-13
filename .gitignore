@@ -41,3 +41,6 @@ build/
 
 *.class
 .idea/
+*.log
+*.tmp
+.env
