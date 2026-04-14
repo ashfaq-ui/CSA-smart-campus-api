@@ -54,47 +54,53 @@ public class SensorResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createSensor(String body) {
+
+        // Parse JSON outside try-catch
+        Sensor sensor;
         try {
-            Sensor sensor = mapper.readValue(body, Sensor.class);
+            sensor = mapper.readValue(body, Sensor.class);
+        } catch (Exception e) {
+            return Response.status(400)
+                    .entity("{\"error\":\"Invalid JSON body\"}")
+                    .build();
+        }
 
-            if (sensor.getId() == null || sensor.getId().isEmpty()) {
-                return Response.status(400)
-                        .entity("{\"error\":\"Sensor ID is required\"}")
-                        .build();
-            }
+        // All validation outside try-catch so exceptions reach mappers
+        if (sensor.getId() == null || sensor.getId().isEmpty()) {
+            return Response.status(400)
+                    .entity("{\"error\":\"Sensor ID is required\"}")
+                    .build();
+        }
 
-            if (store.getSensors().containsKey(sensor.getId())) {
-                return Response.status(409)
-                        .entity("{\"error\":\"Sensor already exists\"}")
-                        .build();
-            }
+        if (store.getSensors().containsKey(sensor.getId())) {
+            return Response.status(409)
+                    .entity("{\"error\":\"Sensor already exists\"}")
+                    .build();
+        }
 
-            // Validate roomId exists
-            if (sensor.getRoomId() == null || sensor.getRoomId().isEmpty()) {
-                return Response.status(400)
-                        .entity("{\"error\":\"Room ID is required\"}")
-                        .build();
-            }
-            Room room = store.getRooms().get(sensor.getRoomId());
-            if (room == null) {
-                throw new LinkedResourceNotFoundException("Room", sensor.getRoomId());
-            }
+        if (sensor.getRoomId() == null || sensor.getRoomId().isEmpty()) {
+            return Response.status(400)
+                    .entity("{\"error\":\"Room ID is required\"}")
+                    .build();
+        }
 
-            // Set default status if not provided
-            if (sensor.getStatus() == null || sensor.getStatus().isEmpty()) {
-                sensor.setStatus("ACTIVE");
-            }
+        // This throw is now OUTSIDE try-catch — mapper will catch it
+        Room room = store.getRooms().get(sensor.getRoomId());
+        if (room == null) {
+            throw new LinkedResourceNotFoundException("Room", sensor.getRoomId());
+        }
 
-            // Save sensor
-            store.getSensors().put(sensor.getId(), sensor);
+        if (sensor.getStatus() == null || sensor.getStatus().isEmpty()) {
+            sensor.setStatus("ACTIVE");
+        }
 
-            // Link sensor to room
-            room.getSensorIds().add(sensor.getId());
+        store.getSensors().put(sensor.getId(), sensor);
+        room.getSensorIds().add(sensor.getId());
 
+        try {
             return Response.status(201)
                     .entity(mapper.writeValueAsString(sensor))
                     .build();
-
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(500)
