@@ -22,15 +22,18 @@ http://localhost:8080/api/v1
 │   ├── GET    - list all rooms
 │   ├── POST   - create a room
 │   ├── GET    /{roomId} - get room by ID
+│   ├── PUT    /{roomId} - update a room
 │   └── DELETE /{roomId} - delete room
 ├── /sensors
 │   ├── GET    - list all sensors (optional ?type= filter)
 │   ├── POST   - create a sensor
 │   ├── GET    /{sensorId} - get sensor by ID
+│   ├── PUT    /{sensorId} - update a sensor
 │   ├── DELETE /{sensorId} - delete sensor
 │   └── /{sensorId}/readings
 │       ├── GET  - get all readings
-│       └── POST - add a new reading
+│       ├── POST - add a new reading
+│       └── GET  /{readingId} - get reading by ID
 └── GET / - API discovery endpoint
 ```
 
@@ -78,6 +81,21 @@ You should see:
 
 ---
 
+## Seed Data
+
+The server automatically loads sample data on startup:
+
+| ID | Name | Type |
+|----|------|------|
+| LIB-301 | Library Quiet Study | Room |
+| CS-101 | Computer Science Lab | Room |
+| ENG-205 | Engineering Workshop | Room |
+| TEMP-001 | Temperature Sensor | Sensor (ACTIVE) |
+| CO2-001 | CO2 Sensor | Sensor (ACTIVE) |
+| OCC-001 | Occupancy Sensor | Sensor (MAINTENANCE) |
+
+---
+
 ## Sample curl Commands
 
 ### 1. Get API info
@@ -89,7 +107,7 @@ curl http://localhost:8080/api/v1
 ```bash
 curl -X POST http://localhost:8080/api/v1/rooms \
   -H "Content-Type: application/json" \
-  -d '{"id":"LIB-301","name":"Library Quiet Study","capacity":50}'
+  -d '{"id":"ROOM-001","name":"Test Room","capacity":30}'
 ```
 
 ### 3. Get all rooms
@@ -97,44 +115,62 @@ curl -X POST http://localhost:8080/api/v1/rooms \
 curl http://localhost:8080/api/v1/rooms
 ```
 
-### 4. Create a sensor
+### 4. Get room by ID
+```bash
+curl http://localhost:8080/api/v1/rooms/LIB-301
+```
+
+### 5. Update a room
+```bash
+curl -X PUT http://localhost:8080/api/v1/rooms/LIB-301 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Library Main Hall","capacity":100}'
+```
+
+### 6. Create a sensor
 ```bash
 curl -X POST http://localhost:8080/api/v1/sensors \
   -H "Content-Type: application/json" \
-  -d '{"id":"TEMP-001","type":"Temperature","status":"ACTIVE","currentValue":22.5,"roomId":"LIB-301"}'
+  -d '{"id":"TEMP-002","type":"Temperature","status":"ACTIVE","currentValue":22.5,"roomId":"LIB-301"}'
 ```
 
-### 5. Get sensors filtered by type
+### 7. Get sensors filtered by type
 ```bash
 curl "http://localhost:8080/api/v1/sensors?type=Temperature"
 ```
 
-### 6. Add a sensor reading
+### 8. Add a sensor reading
 ```bash
 curl -X POST http://localhost:8080/api/v1/sensors/TEMP-001/readings \
   -H "Content-Type: application/json" \
   -d '{"value":24.5}'
 ```
 
-### 7. Get all readings for a sensor
+### 9. Get all readings for a sensor
 ```bash
 curl http://localhost:8080/api/v1/sensors/TEMP-001/readings
-```
-
-### 8. Delete a room (fails if sensors exist)
-```bash
-curl -X DELETE http://localhost:8080/api/v1/rooms/LIB-301
-```
-
-### 9. Get a specific sensor
-```bash
-curl http://localhost:8080/api/v1/sensors/TEMP-001
 ```
 
 ### 10. Delete a sensor
 ```bash
 curl -X DELETE http://localhost:8080/api/v1/sensors/TEMP-001
 ```
+
+---
+
+## Error Codes Summary
+
+| Code | Meaning | Scenario |
+|------|---------|----------|
+| 200 | OK | Successful GET |
+| 201 | Created | Successful POST |
+| 204 | No Content | Successful DELETE |
+| 400 | Bad Request | Missing required fields |
+| 403 | Forbidden | Sensor in MAINTENANCE or OFFLINE |
+| 404 | Not Found | Resource does not exist |
+| 409 | Conflict | Delete room with sensors |
+| 422 | Unprocessable Entity | Invalid roomId reference |
+| 500 | Internal Server Error | Unexpected server error |
 
 ---
 
@@ -235,15 +271,15 @@ accurate than 404.
 ### Part 5 — Q2: Stack Trace Security Risk
 Exposing Java stack traces to external API consumers is a serious security
 risk. Stack traces reveal internal class names, package structures, method
-names, and line numbers. An attacker can use this information to identify
-the frameworks and libraries being used, find known vulnerabilities in
-those specific versions, understand the application architecture and
-identify weak points, and craft targeted attacks based on the internal
-structure of the application.
+names, and line numbers.
 
-The global ExceptionMapper catches all unexpected errors and returns a
-generic 500 message without any internal details, preventing information
-leakage while still informing the client that an error occurred.
+An attacker can use this information to identify the frameworks and
+libraries being used, find known vulnerabilities in those specific
+versions, understand the application architecture and identify weak
+points, and craft targeted attacks based on the internal structure of
+the application. The global ExceptionMapper catches all unexpected errors
+and returns a generic 500 message without any internal details, preventing
+information leakage while still informing the client that an error occurred.
 
 ### Part 5 — Q3: JAX-RS Filters vs Manual Logging
 Using JAX-RS filters for cross-cutting concerns like logging is
@@ -256,17 +292,3 @@ to be updated. It also keeps resource methods clean and focused on
 business logic only. Filters are applied consistently to all endpoints
 without any risk of forgetting to add logging to a new method. This
 is the same principle behind Aspect-Oriented Programming.
-
-## Error Codes Summary
-
-| Code | Meaning | Scenario |
-|------|---------|----------|
-| 200 | OK | Successful GET |
-| 201 | Created | Successful POST |
-| 204 | No Content | Successful DELETE |
-| 400 | Bad Request | Missing required fields |
-| 403 | Forbidden | Sensor in MAINTENANCE or OFFLINE |
-| 404 | Not Found | Resource does not exist |
-| 409 | Conflict | Delete room with sensors |
-| 422 | Unprocessable Entity | Invalid roomId reference |
-| 500 | Internal Server Error | Unexpected server error |
