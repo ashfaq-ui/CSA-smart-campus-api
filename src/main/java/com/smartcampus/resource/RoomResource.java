@@ -126,4 +126,12 @@ public class RoomResource {
                     .build();
         }
     }
+    @GET
+    @Path("/crash")
+    public Response crash() {
+        String s = null;
+        s.length();
+        return Response.ok().build();
+    }
+
 }
