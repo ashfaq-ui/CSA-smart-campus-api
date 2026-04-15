@@ -36,7 +36,27 @@ http://localhost:8080/api/v1
 │       └── GET  /{readingId} - get reading by ID
 └── GET / - API discovery endpoint
 ```
+---
+## Complete API Endpoints Table
 
+| Method | Endpoint | Description | Success Code | Error Codes |
+|--------|----------|-------------|--------------|-------------|
+| GET | /api/v1 | API discovery and HATEOAS links | 200 | - |
+| GET | /api/v1/rooms | Get all rooms | 200 | - |
+| POST | /api/v1/rooms | Create a new room | 201 | 400, 409 |
+| GET | /api/v1/rooms/{roomId} | Get room by ID | 200 | 404 |
+| PUT | /api/v1/rooms/{roomId} | Update a room | 200 | 404 |
+| DELETE | /api/v1/rooms/{roomId} | Delete a room | 204 | 404, 409 |
+| GET | /api/v1/sensors | Get all sensors | 200 | - |
+| GET | /api/v1/sensors?type={type} | Filter sensors by type | 200 | - |
+| POST | /api/v1/sensors | Create a new sensor | 201 | 400, 409, 422 |
+| GET | /api/v1/sensors/{sensorId} | Get sensor by ID | 200 | 404 |
+| PUT | /api/v1/sensors/{sensorId} | Update a sensor | 200 | 404 |
+| DELETE | /api/v1/sensors/{sensorId} | Delete a sensor | 204 | 404 |
+| GET | /api/v1/sensors/{sensorId}/readings | Get all readings | 200 | 404 |
+| POST | /api/v1/sensors/{sensorId}/readings | Add a new reading | 201 | 403, 404 |
+| GET | /api/v1/sensors/{sensorId}/readings/{readingId} | Get reading by ID | 200 | 404 |
+| GET | /api/v1/rooms/crash | Demo 500 error handler | - | 500 |
 ---
 
 ## How to Build and Run
