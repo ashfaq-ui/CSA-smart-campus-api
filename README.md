@@ -91,69 +91,427 @@ The server automatically loads sample data on startup:
 | CS-101 | Computer Science Lab | Room |
 | ENG-205 | Engineering Workshop | Room |
 | TEMP-001 | Temperature Sensor | Sensor (ACTIVE) |
-| CO2-001 | CO2 Sensor | Sensor (ACTIVE) |
-| OCC-001 | Occupancy Sensor | Sensor (MAINTENANCE) |
+| CO2-001 | CO2 Sensor (CS-101) | Sensor (ACTIVE) |
+| OCC-001 | Occupancy Sensor (ENG-205) | Sensor (MAINTENANCE) |
 
 ---
 
-## Sample curl Commands
+## API Endpoints
 
-### 1. Get API info
+### Discovery
+
+#### GET /api/v1
+Returns API metadata and HATEOAS links.
+
+**Request:**
 ```bash
 curl http://localhost:8080/api/v1
 ```
 
-### 2. Create a room
+**Response 200:**
+```json
+{
+  "api": "Smart Campus API",
+  "version": "v1",
+  "status": "running",
+  "contact": "admin@smartcampus.ac.uk",
+  "timestamp": 1776089672921,
+  "documentation": "See README.md for full API docs",
+  "resources": {
+    "rooms": "/api/v1/rooms",
+    "sensors": "/api/v1/sensors"
+  }
+}
+```
+
+---
+
+### Rooms
+
+#### GET /api/v1/rooms
+Returns all rooms.
+
+**Request:**
+```bash
+curl http://localhost:8080/api/v1/rooms
+```
+
+**Response 200:**
+```json
+[
+  {
+    "id": "LIB-301",
+    "name": "Library Quiet Study",
+    "capacity": 50,
+    "sensorIds": ["TEMP-001"]
+  }
+]
+```
+
+---
+
+#### POST /api/v1/rooms
+Creates a new room.
+
+**Request:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/rooms \
   -H "Content-Type: application/json" \
   -d '{"id":"ROOM-001","name":"Test Room","capacity":30}'
 ```
 
-### 3. Get all rooms
-```bash
-curl http://localhost:8080/api/v1/rooms
+**Response 201:**
+```json
+{
+  "id": "ROOM-001",
+  "name": "Test Room",
+  "capacity": 30,
+  "sensorIds": []
+}
 ```
 
-### 4. Get room by ID
+**Response 409 (room already exists):**
+```json
+{
+  "error": "Room already exists"
+}
+```
+
+---
+
+#### GET /api/v1/rooms/{roomId}
+Returns a specific room by ID.
+
+**Request:**
 ```bash
 curl http://localhost:8080/api/v1/rooms/LIB-301
 ```
 
-### 5. Update a room
+**Response 200:**
+```json
+{
+  "id": "LIB-301",
+  "name": "Library Quiet Study",
+  "capacity": 50,
+  "sensorIds": ["TEMP-001"]
+}
+```
+
+**Response 404:**
+```json
+{
+  "error": "Room not found: LIB-301"
+}
+```
+
+---
+
+#### PUT /api/v1/rooms/{roomId}
+Updates an existing room.
+
+**Request:**
 ```bash
 curl -X PUT http://localhost:8080/api/v1/rooms/LIB-301 \
   -H "Content-Type: application/json" \
   -d '{"name":"Library Main Hall","capacity":100}'
 ```
 
-### 6. Create a sensor
+**Response 200:**
+```json
+{
+  "id": "LIB-301",
+  "name": "Library Main Hall",
+  "capacity": 100,
+  "sensorIds": ["TEMP-001"]
+}
+```
+
+**Response 404:**
+```json
+{
+  "error": "Room not found: LIB-301"
+}
+```
+
+---
+
+#### DELETE /api/v1/rooms/{roomId}
+Deletes a room. Blocked if room has sensors.
+
+**Request:**
+```bash
+curl -X DELETE http://localhost:8080/api/v1/rooms/ROOM-001
+```
+
+**Response 204:** No content — success
+
+**Response 404:**
+```json
+{
+  "error": "Room not found: ROOM-001"
+}
+```
+
+**Response 409 (room has sensors):**
+```json
+{
+  "hint": "Remove all sensors from this room before deleting it",
+  "error": "409 Conflict",
+  "message": "Room LIB-301 still has sensors assigned to it",
+  "roomId": "LIB-301"
+}
+```
+
+---
+
+### Sensors
+
+#### GET /api/v1/sensors
+Returns all sensors. Supports optional type filter.
+
+**Request — all sensors:**
+```bash
+curl http://localhost:8080/api/v1/sensors
+```
+
+**Request — filtered by type:**
+```bash
+curl "http://localhost:8080/api/v1/sensors?type=Temperature"
+```
+
+**Response 200:**
+```json
+[
+  {
+    "id": "TEMP-001",
+    "type": "Temperature",
+    "status": "ACTIVE",
+    "currentValue": 22.5,
+    "roomId": "LIB-301"
+  }
+]
+```
+
+---
+
+#### POST /api/v1/sensors
+Creates a new sensor. roomId must exist.
+
+**Request:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/sensors \
   -H "Content-Type: application/json" \
   -d '{"id":"TEMP-002","type":"Temperature","status":"ACTIVE","currentValue":22.5,"roomId":"LIB-301"}'
 ```
 
-### 7. Get sensors filtered by type
-```bash
-curl "http://localhost:8080/api/v1/sensors?type=Temperature"
+**Response 201:**
+```json
+{
+  "id": "TEMP-002",
+  "type": "Temperature",
+  "status": "ACTIVE",
+  "currentValue": 22.5,
+  "roomId": "LIB-301"
+}
 ```
 
-### 8. Add a sensor reading
+**Response 422 (roomId does not exist):**
+```json
+{
+  "hint": "The referenced resource does not exist in the system",
+  "error": "422 Unprocessable Entity",
+  "message": "Room not found with ID: FAKE-999",
+  "resourceType": "Room",
+  "resourceId": "FAKE-999"
+}
+```
+
+---
+
+#### GET /api/v1/sensors/{sensorId}
+Returns a specific sensor by ID.
+
+**Request:**
+```bash
+curl http://localhost:8080/api/v1/sensors/TEMP-001
+```
+
+**Response 200:**
+```json
+{
+  "id": "TEMP-001",
+  "type": "Temperature",
+  "status": "ACTIVE",
+  "currentValue": 22.5,
+  "roomId": "LIB-301"
+}
+```
+
+**Response 404:**
+```json
+{
+  "error": "Sensor not found: TEMP-001"
+}
+```
+
+---
+
+#### PUT /api/v1/sensors/{sensorId}
+Updates an existing sensor.
+
+**Request:**
+```bash
+curl -X PUT http://localhost:8080/api/v1/sensors/TEMP-001 \
+  -H "Content-Type: application/json" \
+  -d '{"status":"MAINTENANCE"}'
+```
+
+**Response 200:**
+```json
+{
+  "id": "TEMP-001",
+  "type": "Temperature",
+  "status": "MAINTENANCE",
+  "currentValue": 22.5,
+  "roomId": "LIB-301"
+}
+```
+
+**Response 404:**
+```json
+{
+  "error": "Sensor not found: TEMP-001"
+}
+```
+
+---
+
+#### DELETE /api/v1/sensors/{sensorId}
+Deletes a sensor and unlinks it from its room.
+
+**Request:**
+```bash
+curl -X DELETE http://localhost:8080/api/v1/sensors/TEMP-001
+```
+
+**Response 204:** No content — success
+
+**Response 404:**
+```json
+{
+  "error": "Sensor not found: TEMP-001"
+}
+```
+
+---
+
+### Sensor Readings
+
+#### GET /api/v1/sensors/{sensorId}/readings
+Returns all readings for a sensor.
+
+**Request:**
+```bash
+curl http://localhost:8080/api/v1/sensors/TEMP-001/readings
+```
+
+**Response 200:**
+```json
+[
+  {
+    "id": "d01351fc-1eea-4b8c-a3de-d72c8b0a13f9",
+    "timestamp": 1776089672921,
+    "value": 24.5
+  }
+]
+```
+
+**Response 404:**
+```json
+{
+  "error": "Sensor not found: TEMP-001"
+}
+```
+
+---
+
+#### POST /api/v1/sensors/{sensorId}/readings
+Adds a new reading. Blocked if sensor is MAINTENANCE or OFFLINE.
+Also updates the parent sensor currentValue automatically.
+
+**Request:**
 ```bash
 curl -X POST http://localhost:8080/api/v1/sensors/TEMP-001/readings \
   -H "Content-Type: application/json" \
   -d '{"value":24.5}'
 ```
 
-### 9. Get all readings for a sensor
-```bash
-curl http://localhost:8080/api/v1/sensors/TEMP-001/readings
+**Response 201:**
+```json
+{
+  "id": "d01351fc-1eea-4b8c-a3de-d72c8b0a13f9",
+  "timestamp": 1776089672921,
+  "value": 24.5
+}
 ```
 
-### 10. Delete a sensor
+**Response 403 (sensor in MAINTENANCE or OFFLINE):**
+```json
+{
+  "hint": "Change sensor status to ACTIVE before posting readings",
+  "error": "403 Forbidden",
+  "message": "Sensor OCC-001 is currently MAINTENANCE and cannot accept new readings",
+  "sensorId": "OCC-001",
+  "status": "MAINTENANCE"
+}
+```
+
+---
+
+#### GET /api/v1/sensors/{sensorId}/readings/{readingId}
+Returns a specific reading by ID.
+
+**Request:**
 ```bash
-curl -X DELETE http://localhost:8080/api/v1/sensors/TEMP-001
+curl http://localhost:8080/api/v1/sensors/TEMP-001/readings/d01351fc-1eea-4b8c-a3de-d72c8b0a13f9
+```
+
+**Response 200:**
+```json
+{
+  "id": "d01351fc-1eea-4b8c-a3de-d72c8b0a13f9",
+  "timestamp": 1776089672921,
+  "value": 24.5
+}
+```
+
+**Response 404:**
+```json
+{
+  "error": "Reading not found: d01351fc-1eea-4b8c-a3de-d72c8b0a13f9"
+}
+```
+
+---
+
+### Global Error Responses
+
+#### 500 Internal Server Error
+Returned when an unexpected error occurs.
+No internal details are exposed for security reasons.
+
+**Request:**
+```bash
+curl http://localhost:8080/api/v1/rooms/crash
+```
+
+**Response 500:**
+```json
+{
+  "hint": "Please contact the API administrator",
+  "error": "500 Internal Server Error",
+  "message": "An unexpected error occurred"
+}
 ```
 
 ---
