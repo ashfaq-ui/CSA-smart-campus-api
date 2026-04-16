@@ -1,8 +1,20 @@
 # Smart Campus API
 
+---
+## Student Information
+
+| Field | Details                                           |
+|-------|---------------------------------------------------|
+| Name | Mohamed Ashfaq                                    |
+| Module | 5COSC022W — Client-Server Architectures           |
+| University ID | w2121237                                          |
+| GitHub Repo | https://github.com/ashfaq-ui/CSA-smart-campus-api |
+| Submission Date | 16 April 2026                                     |
+
+---
 A RESTful API built with JAX-RS (Jersey) and Grizzly for managing rooms and
 sensors across a university smart campus.
-
+---
 ## Technology Stack
 - Java 11
 - JAX-RS (Jersey 2.35)
